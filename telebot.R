@@ -23,6 +23,8 @@ stock_symbols <- c("HDFCAMC.NS", "APOLLOHOSP.NS", "OFSS.NS", "LUPIN.NS", "INDHOT
                    "BAJAJHLDNG.NS", "TORNTPHARM.NS", "UNITDSPR.NS", "BOSCHLTD.NS","NAUKRI.NS","RELIANCE.NS",
                     "LICI.NS", "TATAMOTORS.NS","ADANIPOWER.NS", "IRFC.NS", "TATASTEEL.NS", "AMBUJACEM.NS", "ADANIENSOL.NS", "LODHA.NS")
 
+counter <- 0
+
 dotenv::load_dot_env()
 # Define your bot token
 bot_token <- Sys.getenv("BOT_TOKEN")
@@ -73,16 +75,22 @@ check_ema_crossover <- function(symbol) {
 current_ema_9 < current_ema_100    
     # Return appropriate message
     if (crossed_above) {
+      counter <- counter + 1
       return(paste(symbol, ": EMA 9 just crossed ABOVE EMA 50 and EMA 100\n"))
     } else if (crossed_below) {
+      counter <- counter + 1
       return(paste(symbol, ": EMA 9 just crossed BELOW EMA 50 and EMA 100\n"))
     } else if (n_crossed_above_50) {
+      counter <- counter + 1
       return(paste(symbol, ": EMA 9 just crossed ABOVE EMA 50\n"))
     } else if (n_crossed_below_50) {
+      counter <- counter + 1
       return(paste(symbol, ": EMA 9 just crossed BELOW EMA 50\n"))
     } else if (n_crossed_above_100) {
+      counter <- counter + 1
       return(paste(symbol, ": EMA 9 just crossed ABOVE EMA 100\n"))
     } else if (n_crossed_below_100) {
+      counter <- counter + 1
       return(paste(symbol, ": EMA 9 just crossed BELOW EMA 100\n"))
     }
   }, error = function(e) {
@@ -98,7 +106,11 @@ stock_handler <- function(bot, update) {
     result <- check_ema_crossover(symbol)
     result_messages <- c(result_messages, result)
   }
-  
+
+if (counter==0) {
+      message = "No crossovers found\n"
+      bot$sendMessage(chat_id = update$message$chat_id, text = message)
+}  
   # Check message length to avoid Telegram's message length restriction
   final_message <- paste(result_messages, collapse = "\n")
   if (nchar(final_message) > 4096) {
